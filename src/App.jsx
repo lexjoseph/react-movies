@@ -1,37 +1,87 @@
 import { useState, useEffect } from "react";
-import React from 'react'
+import React from "react";
+import Search from "./Components/Search";
 
+const API_BASE_URL = "https://api.themoviedb.org/3";
+
+const API_KEY = import.meta.env.VITE_TMDB_API_KEY;
+
+// const API_OPTIONS = {
+//   method: "GET",
+//   header: {
+//     accept: "application/json",
+//     authorization: `Bearer ${API_KEY}`,
+//   },
+// };
+
+const API_OPTIONS = {
+  method: "GET",
+  header: {
+    accept: "application/json",
+    Authorization: `Bearer ${API_KEY}`,
+  },
+};
 
 const App = () => {
+  const Timer = () => {
+    const [count, setCount] = useState(0);
 
+    useEffect(() => {
+      setTimeout(() => {
+        setCount((count) => count + 1);
+      }, 5000);
+    });
 
-  function Timer() {
-  const [count, setCount] = useState(0);
+    return <h1>I've rendered {count} times!</h1>;
+  };
+
+  //useState
+  const [errorMessage, setErrorMessage] = useState("");
+  const [searchTerm, setSearchTerm] = useState("");
+
+  const fetchMovie1 = async () => {
+
+    try {
+      const endpoint = `${API_BASE_URL}/discover/movie?sort_by=popularity.desc`
+
+      const response = fetch(endpoint, API_OPTIONS);
+      
+      if (!response.ok){
+        throw new Error('Failed to fetch movies')
+      }
+      const data = await response.json
+    } catch (error) {
+      console.error(`We have an error!!! - ${error}`);
+      setErrorMessage('Error Fetching movies. Please try again later.')
+    }
+  };
+
+  
 
   useEffect(() => {
-    setTimeout(() => {
-      setCount((count) => count + 1);
-    }, 5000);
-  });
+    fetchMovie1();
+  }, []);
 
-  return <h1>I've rendered {count} times!</h1>;
-}
   return (
     <main>
-      <div className="pattern"/>
+      <div className="pattern" />
       <div className="wrapper">
+        <header>
+          <img src="./hero.png" alt="hero Banner"></img>
+          <h1>
+            Find <span className="text-gradient">Movies</span> You'll Enjoy
+            Without the Hassle
+          </h1>
+          <Search searchTerm={searchTerm} setSearchTerm={setSearchTerm} />
+        </header>
+        <section className="all-movies">
+          <h2>All movies</h2>
+          {errorMessage && <p className="text-red-500">{errorMessage}</p>}
 
-    
-      <header>
-        <h1>Find <span className="text-gradient">Movies</span> You'll Enjoy Without the Hassle</h1>
-        <Timer />
-      </header>
-      
-      <p>Search</p>
-
+        </section>
       </div>
     </main>
-  )
-}
+  );
+};
 
-export default App
+export default App;
